@@ -1,0 +1,42 @@
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+
+# Python environments and generated files
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+build/
+dist/
+*.egg-info/
+
+# Transcripts, usage counters, local databases and model downloads
+/data/
+/models/
+*.llamafile
+*.llamafile.exe
+*.gguf
+*.crdownload
+*.part
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.sqlite3-wal
+*.sqlite3-shm
+
+# Logs and local tools
+*.log
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

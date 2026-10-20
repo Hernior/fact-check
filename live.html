@@ -1,0 +1,111 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Checagem ao Vivo — Monitor</title><style>
+:root{font-family:system-ui,Arial,sans-serif;color:#172540;background:#f2f5fa}*{box-sizing:border-box}body{margin:0}header{background:#101b33;color:white;padding:20px max(20px,calc((100vw - 1120px)/2));font-size:23px;font-weight:800}header span{color:#77a9ff}main{max-width:1120px;margin:auto;padding:24px 20px}h1{margin:0 0 6px;font-size:32px}p{color:#65728a;line-height:1.5}section,.tile{background:white;border:1px solid #dfe4ef;border-radius:14px;padding:18px;box-shadow:0 3px 16px #1e28440a}form{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}input{min-width:280px;flex:1;border:1px solid #ccd6e6;border-radius:9px;padding:12px;font:inherit}button{border:0;border-radius:9px;padding:12px 18px;font-weight:700;background:#215de4;color:white;cursor:pointer}button.stop{background:#c12745}button:disabled{opacity:.45;cursor:default}.layout{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:20px}.stack{display:grid;gap:12px;align-content:start}.tile{padding:15px}.tiny{font-size:12px;color:#78849a}.status{font-weight:700;color:#245ada}.pill{border-radius:99px;font-size:11px;font-weight:800;padding:5px 9px;background:#e8ecfa;color:#495777;display:inline-block}.fato{background:#d9f7e8;color:#076738}.fake{background:#ffe1e5;color:#a31433}.inconclusivo,.sem-evidencias{background:#fff0c7;color:#805300}a{overflow-wrap:anywhere;color:#245ddc}ul{margin:7px 0;padding-left:20px}.empty{padding:20px;color:#7c8799;text-align:center}.top{display:flex;gap:10px;align-items:center;justify-content:space-between}#err{color:#a81835}small{color:#66778a}@media(max-width:750px){.layout{grid-template-columns:1fr}}
+progress{width:100%;height:16px;accent-color:#245ada}.progress-step{margin:12px 0}.spinner{display:inline-block;width:16px;height:16px;border:2px solid #dfe4ef;border-top-color:#245ada;border-radius:50%;animation:spin 1s linear infinite}.spinner[hidden]{display:none}@keyframes spin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){.spinner{animation:none}}select{max-width:100%;padding:10px;border:1px solid #ccd6e6;border-radius:8px}</style></head><body><header>● Checagem <span>ao Vivo</span></header><main><h1>Monitor de transmissões</h1><p>Transcrição local com Whisper, detecção de afirmações via IA e pesquisa opcional. As sugestões da IA são preliminares e exigem revisão das fontes originais.</p><section><div class="top"><b>Captura de áudio</b><span id="status" class="status">Parado</span></div><p>Abra a transmissão em outra aba do Chrome. Clique em &ldquo;Capturar áudio da aba&rdquo;, escolha a aba e marque &ldquo;Compartilhar áudio da aba&rdquo;. A captura continua nessa aba mesmo quando você alterna entre abas.</p><label for="participants">Participantes do debate (opcional)</label><input id="participants" type="text" maxlength="1600" placeholder="Ex.: Lula, Flávio Bolsonaro" aria-describedby="participants-help"><p id="participants-help" class="tiny">Separe os nomes por vírgula. Eles serão opções quando o sujeito de uma afirmação estiver incerto; não identificam automaticamente quem está falando.</p><button id="capture" type="button">Capturar áudio da aba</button><p id="capture-message" role="status" aria-live="polite"></p><small>Este modo usa Whisper e Qwen locais. Use &ldquo;Pesquisar evidências&rdquo; na afirmação desejada. Cada nova pesquisa usa uma consulta Brave; a captura não pesquisa automaticamente.</small><form id="form"><input id="url" type="url" aria-label="URL do YouTube (alternativa)" placeholder="Alternativa: URL do YouTube" required><button id="start">Iniciar</button><button id="stop" class="stop" type="button">Parar</button><button id="clear" class="stop" type="button" disabled title="Pare a captura antes de limpar">Limpar dados</button></form><p id="clear-message" role="status" aria-live="polite"></p><small id="config"></small><p id="quota" class="tiny" role="status"></p><p id="err"></p><small id="counts"></small></section><section id="capture-progress" hidden aria-label="Progresso do processamento" style="margin-top:16px"><b id="progress-received"></b><div class="progress-step"><label id="progress-transcription-label" for="progress-transcription">Transcrição</label><progress id="progress-transcription" max="100" value="0"></progress></div><div class="progress-step"><label id="progress-analysis-label" for="progress-analysis">Análise automática</label><progress id="progress-analysis" max="100" value="0"></progress></div><span id="progress-spinner" class="spinner" aria-hidden="true" hidden></span><p id="progress-message" role="status" aria-live="polite"></p><small>Os percentuais comparam o trabalho concluído com o áudio recebido até agora; podem diminuir enquanto a captura continua. A análise automática não inclui sua revisão de sujeitos nem pesquisa Brave.</small></section><section style="margin-top:16px"><label for="session-history">Sessão exibida</label> <select id="session-history"><option value="">Sessão atual</option></select><p id="session-view-label" class="tiny">Exibindo a sessão atual.</p></section><p id="assessment-disclaimer" class="tiny"><strong>Análise preliminar gerada por IA, sujeita a erros.</strong> “Fato” indica evidências que sustentam a afirmação; “Fake” indica evidências que a contradizem. Evidências ausentes, insuficientes ou conflitantes resultam em “Inconclusivo”. A ausência de evidências não comprova falsidade. Resultados e trechos de busca podem omitir contexto; consulte as fontes originais. A base usada é indicada em cada cartão: trechos de busca ou texto extraído das fontes. A extração automatizada pode omitir contexto; fontes inacessíveis ou leitura incompleta mantêm a sugestão inconclusiva.</p><div class="layout"><div><h2>📝 Transcrição</h2><div id="segments" class="stack"><div class="empty">Nenhum trecho transcrito.</div></div></div><div><h2>🔎 Afirmações e evidências</h2><div id="claims" class="stack"><div class="empty">Nenhuma afirmação identificada.</div></div></div></div></main><script src="/session-panel.js"></script><script src="/subject-panel.js"></script><script>
+let clearing=false;let searchAvailable=false,quotaBlocked=false,localReady=false;const searchingClaims=new Set(),searchErrors=new Map(),analyzingClaims=new Set(),readingFullClaims=new Set(),analysisErrors=new Map();const $=x=>document.getElementById(x);function tag(t,cl,txt){const e=document.createElement(t);if(cl)e.className=cl;e.textContent=txt;return e}function show(items,parent,render,empty){const root=$(parent);if(parent==='claims'&&document.activeElement?.dataset?.subjectInput)return;root.replaceChildren();if(!items.length){root.append(tag('div','empty',empty));return}for(const x of items)root.append(render(x))}function seg(x){const el=tag('article','tile','');el.append(tag('div','tiny',`Trecho ${x.offset_s}s • ${new Date(x.at).toLocaleTimeString('pt-BR')}`),tag('p','',x.text));return el}function transcriptItems(feed){
+  const paragraphs=feed.paragraphs||[];
+  const grouped=new Set(paragraphs.flatMap(p=>p.originals.map(o=>o.id)));
+  return [...paragraphs,...feed.segments.filter(s=>!grouped.has(s.id))].sort((a,b)=>b.offset_s-a.offset_s);
+}
+const expandedParagraphs=new Set();
+function paragraph(x){
+  if(!x.originals)return seg(x);
+  const el=tag('article','tile','');
+  el.append(tag('div','tiny',`Parágrafo ${x.start_s}–${x.offset_s}s • ${new Date(x.at).toLocaleTimeString('pt-BR')}`));
+  el.append(tag('p','',x.text));
+  el.append(tag('div','tiny',x.revision_error||(!x.finalized?'Aguardando continuação para identificar afirmações.':'Texto revisado por IA local; pode conter erros.')));
+  const originals=tag('details','','');
+  originals.open=expandedParagraphs.has(x.id);
+  originals.ontoggle=()=>{if(originals.open)expandedParagraphs.add(x.id);else expandedParagraphs.delete(x.id)};
+  originals.append(tag('summary','','Ver transcrição original'));
+  for(const o of x.originals)originals.append(tag('p','tiny',`Trecho ${o.offset_s}s: ${o.text}`));
+  el.append(originals);return el;
+}
+function assessmentBadge(x){
+  const assessment=x.full_assessment||x.assessment;
+  if(!assessment)return tag('span','pill',x.status);
+  const verdict=assessment.verdict;
+  const labels={fato:'✓ Sugestão: Fato',fake:'⚠ Sugestão: Fake',inconclusivo:'? Sugestão: Inconclusivo'};
+  return tag('span','pill '+(labels[verdict]?verdict:'inconclusivo'),labels[verdict]||labels.inconclusivo);
+}
+function renderAssessment(x,el){
+  const assessment=x.full_assessment||x.assessment;
+  if(assessment){
+    el.append(tag('p','',assessment.explanation));
+    el.append(tag('div','tiny',(x.full_assessment?'Análise do texto extraído das fontes · ':'Análise local de trechos de busca · ')+new Date(assessment.assessed_at).toLocaleString('pt-BR')));
+    for(const cite of assessment.citations){
+      const source=(x.full_assessment?(x.full_documents||[]).find(d=>d.source_id===cite.source_id):null)||x.sources[cite.source_id];
+      if(!source)continue;
+      const quote=tag('blockquote','','“'+cite.quote+'”');
+      const link=tag('a','',source.title||source.url);link.href=source.url;link.target='_blank';link.rel='noopener noreferrer';
+      quote.append(link);el.append(quote);
+    }
+  }
+  if(x.searched_at&&!assessment){
+    const pending=x.analyzing||analyzingClaims.has(x.id);
+    const button=tag('button','',pending?'Analisando...':'Analisar com IA');button.type='button';
+    button.disabled=pending||x.searching||clearing||(!localReady&&x.sources.length>0);
+    button.onclick=()=>analyzeClaim(x.id);el.append(button);
+  }
+  if(x.full_documents&&x.full_documents.length){
+    const list=tag('ul','tiny','');
+    for(const doc of x.full_documents){
+      const info=(doc.status==='ok'?'Texto obtido':'Fonte indisponível')+' · '+(doc.title||doc.url)+' · Data detectada: '+(doc.published_date||'não informada')+' · Consultada em '+new Date(doc.fetched_at).toLocaleString('pt-BR');
+      list.append(tag('li','',info+(doc.error?' · '+doc.error:'')));
+    }
+    el.append(list);
+    if(x.full_assessment&&!x.full_assessment.complete)el.append(tag('p','tiny','Leitura ou análise incompleta. A sugestão permanece inconclusiva.'));
+  }
+  if(x.searched_at&&x.sources.length){
+    const pending=x.full_progress||readingFullClaims.has(x.id);
+    const done=x.full_assessment&&x.full_assessment.complete;
+    const button=tag('button','',pending?'Lendo e analisando fontes...':done?'Fontes analisadas':x.full_assessment?'Tentar fontes novamente':'Analisar fontes completas');
+    button.type='button';button.disabled=!!done||!!pending||x.analyzing||x.searching||!localReady||clearing;
+    button.onclick=()=>analyzeClaim(x.id,true);el.append(button);
+    if(x.full_progress)el.append(tag('p','tiny',x.full_progress.message));
+  }
+  const error=analysisErrors.get(x.id)||x.analysis_error;
+  if(error)el.append(tag('p','tiny',error));
+}
+function claim(x){const el=tag('article','tile','');const name=tag('div','top','');name.append(tag('small','',`Trecho ${x.offset_s}s`),assessmentBadge(x));el.append(name,tag('h3','',x.text),tag('p','',x.explanation));if(x.sources.length){el.append(tag('b','',`Resultados de pesquisa (${x.evidence_count}):`));const ul=document.createElement('ul');for(const s of x.sources){const li=document.createElement('li');const a=document.createElement('a');a.href=s.url;a.target='_blank';a.rel='noopener noreferrer';a.textContent=s.title||s.url;li.append(a);if(s.snippet)li.append(tag('p','tiny',s.snippet));ul.append(li)}el.append(ul)}
+if(renderSubject(x,el))return el;
+const pending=x.searching||searchingClaims.has(x.id);
+const button=tag('button','',pending?'Pesquisando...':x.searched_at?'Pesquisa concluída':'Pesquisar evidências');
+button.type='button';
+button.disabled=!!x.searched_at||pending||!searchAvailable||quotaBlocked||clearing;
+button.title=x.searched_at?'Resultados já pesquisados':!searchAvailable?'Configure a chave Brave':quotaBlocked?'Cota Brave esgotada':'Usa uma consulta da cota Brave';
+button.onclick=()=>researchClaim(x.id);
+el.append(button);
+if(searchErrors.has(x.id))el.append(tag('p','tiny',searchErrors.get(x.id)));renderAssessment(x,el);
+return el}async function api(path,opts){const r=await fetch('/api/'+path,opts);const body=await r.json();if(!r.ok)throw Error(body.detail||r.status);return body}async function refresh(){try{const s=await api('status'),f=await api(feedPath());renderSessions(await api('sessions'));renderProgress(s);searchAvailable=s.configured.search;localReady=!!s.local_llm.ready;quotaBlocked=s.brave_quota.blocked;$('status').textContent=(s.running||s.stopping)?s.stage:'Parado';$('start').disabled=s.running||s.stopping||!!$('capture').dataset.busy||clearing;$('capture').disabled=s.running||s.stopping||!!$('capture').dataset.busy||clearing;$('stop').disabled=!s.running;$('participants').disabled=s.running||s.stopping||!!$('capture').dataset.busy;$('clear').disabled=!s.can_clear||!!$('capture').dataset.busy||clearing||searchingClaims.size>0||analyzingClaims.size>0||readingFullClaims.size>0||resolvingSubjects.size>0;$('config').textContent=`Whisper: local · IA local: ${s.local_llm.state} · Busca: ${s.configured.search?'configurada':'sem chave'}`;$('quota').textContent=`Brave: ${s.brave_quota.used}/${s.brave_quota.limit} tentativas nos últimos ${s.brave_quota.window_days} dias · ${s.brave_quota.remaining} restantes${s.brave_quota.blocked?' · Pesquisa bloqueada':''}`;$('counts').textContent=`${s.segments} trecho(s) nesta sessão · ${s.claims} afirmação(ões) nesta sessão`;$('err').textContent=s.error||s.local_llm.error||'';show(transcriptItems(f),'segments',paragraph,'Nenhum trecho transcrito.');show(f.claims,'claims',claim,'Nenhuma afirmação identificada.')}catch(e){$('err').textContent=e.message}}$('form').onsubmit=async ev=>{ev.preventDefault();if(clearing)return;try{await api('start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:$('url').value})});resetSessionView();refresh()}catch(e){$('err').textContent=e.message}};$('stop').onclick=async()=>{if($('capture').dataset.busy)return;try{await api('stop',{method:'POST'});refresh()}catch(e){$('err').textContent=e.message}};async function analyzeClaim(id,full=false){
+  if(analyzingClaims.has(id)||readingFullClaims.has(id)||clearing)return;
+  const active=full?readingFullClaims:analyzingClaims;
+  active.add(id);analysisErrors.delete(id);$('clear').disabled=true;
+  const pending=api('claims/'+id+(full?'/analyze-full':'/analyze'),{method:'POST'});refresh();
+  try{await pending;}catch(e){analysisErrors.set(id,e.message);}
+  finally{active.delete(id);await refresh();}
+}
+async function researchClaim(id){
+  if(searchingClaims.has(id)||clearing||!searchAvailable||quotaBlocked)return;
+  searchingClaims.add(id);searchErrors.delete(id);
+  $('clear').disabled=true;
+  const pending=api('claims/'+id+'/search',{method:'POST'});
+  refresh();
+  try{await pending;}
+  catch(e){searchErrors.set(id,e.message);}
+  finally{searchingClaims.delete(id);await refresh();}
+}
+$('clear').onclick=async()=>{
+  if($('clear').disabled||clearing||$('capture').dataset.busy||searchingClaims.size||analyzingClaims.size||readingFullClaims.size||resolvingSubjects.size)return;
+  if(!confirm('Apagar permanentemente todas as sessões, áudios, transcrições, afirmações e evidências salvas? Esta ação não pode ser desfeita. O contador da Brave será preservado.'))return;
+  clearing=true;
+  $('clear').disabled=true;
+  $('start').disabled=true;
+  $('capture').disabled=true;
+  $('clear-message').textContent='Limpando dados...';
+  try{
+    await api('clear',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({confirmed:true})});
+    searchErrors.clear();analysisErrors.clear();subjectDrafts.clear();subjectErrors.clear();resetSessionView();sessionsSignature='';$('clear-message').textContent='Dados apagados. O contador da Brave foi preservado.';
+  }catch(e){$('clear-message').textContent=e.message;}
+  finally{clearing=false;await refresh();}
+};refresh();setInterval(refresh,3000);
+</script><script src="/tab-capture.js"></script></body></html>
